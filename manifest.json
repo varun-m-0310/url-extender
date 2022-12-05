@@ -1,0 +1,21 @@
+{
+  "name": "URL-extender",
+  "description": "Save and use CRM URLs",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "icons": {
+      "16": "images/icon-16.png",
+      "32": "images/icon-32.png",
+      "48": "images/icon-48.png",
+      "128": "images/icon-128.png"
+  },
+  "omnibox": {
+      "keyword": "c/"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "alarms"
+  ]
+}
