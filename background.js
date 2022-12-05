@@ -1,4 +1,5 @@
 import { ENV, APPS } from './config.js';
+
 const APP_KEY_LIST = Object.keys(APPS);
 const ENV_KEY_LIST = Object.keys(ENV);
 
