@@ -13,8 +13,8 @@ export const APPS = {
 };
 
 export const SONAR_QUBE = {
-  "SONAR_QUBE": "https://sonarqube.cc-tooling.cctools.capillarytech.com/",
-}
+  SONAR_QUBE: "https://sonarqube.cc-tooling.cctools.capillarytech.com/",
+};
 
 export const ENV_PREFIX_MAP = {
   IN: "incrm",
@@ -40,7 +40,7 @@ export const PRODUCT_MAP = {
   PMA: "rockmongo.",
 };
 
-export const URLGenerator = (env, product) =>
-  `https://${PRODUCT_MAP[product] || ""}${
-    ENV_PREFIX_MAP[env]
-  }.cctools.capillarytech.${ENV_SUFFIX_MAP[env] || ""}com/`;
+export const URLGenerator = (env, product, app) =>
+  `https://${PRODUCT_MAP[product] || ""}${ENV_PREFIX_MAP[env]}.cc${
+    product ? "tools" : ""
+  }.capillarytech.${ENV_SUFFIX_MAP[env] || ""}com/${APPS[app] || ""}`;

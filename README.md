@@ -21,6 +21,9 @@ Type {shortenURLs} or {cluster}_{productURL}  to generate the URL for a specific
 
 Eg: 
 
+URLs generated based on the keyword Wetty
+![Suggestion for keyword Wetty](/assets/suggestion_Wetty.png)
+
 URLs generated based on the keyword Loyalty
 ![Suggestion for keyword Loyalty](/assets/suggestion_Loyalty.png)
 
