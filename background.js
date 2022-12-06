@@ -12,18 +12,23 @@ const PRODUCT_KEY_LIST = Object.keys(PRODUCT_MAP);
 const SONAR_QUBE_LIST = Object.keys(SONAR_QUBE);
 
 const getFilteredList = (list, key) =>
-  list.filter((env) => env.toLowerCase().indexOf(key.toLowerCase()) !== -1);
+  list.filter(
+    (env) => key && env.toLowerCase().indexOf(key.toLowerCase()) !== -1
+  );
 
-const getSuggestionsAtom = (env, product = "") => {
-  let URL = URLGenerator(env, product);
+const getSuggestionsAtom = (env, product = "", app = "") => {
+  console.log('getSuggestionsAtom', env, app);
+  let URL = URLGenerator(env, product, app);
   return {
     content: `${URL}`,
     deletable: true,
-    description: `${env}${product ? `-${product}` : ""} URL: <url>${URL}</url>`,
+    description: `${env}${product ? `-${product}` : ""}${
+      app ? `-${app}` : ""
+    } URL: <url>${URL}</url>`,
   };
 };
 
-const getSuggestions = (envText, productText, appText) => {
+const getSuggestions = (envText, productText, appText, isNonGeneric = false) => {
   const filteredProduct = getFilteredList(PRODUCT_KEY_LIST, productText);
   const filteredEnv = getFilteredList(ENV_KEY_LIST, envText);
   const filteredApp = getFilteredList(APP_KEY_LIST, appText);
@@ -32,7 +37,7 @@ const getSuggestions = (envText, productText, appText) => {
   const isKeyPresent = {};
   const suggestion = [];
 
-  if (isSonarQube) {
+  if (isSonarQube.length) {
     suggestion.push({
       content: `${SONAR_QUBE.SONAR_QUBE}`,
       deletable: true,
@@ -40,12 +45,22 @@ const getSuggestions = (envText, productText, appText) => {
     });
   }
 
-  if (filteredProduct.length) {
-    filteredProduct.forEach((product) => {
-      ENV_KEY_LIST.forEach((env) => {
+  if (filteredEnv.length && filteredProduct.length) {
+    filteredEnv.forEach((env) => {
+      filteredProduct.forEach((product) => {
         if (isKeyPresent[`${env}-${product}`]) return;
         isKeyPresent[`${env}-${product}`] = true;
         suggestion.push(getSuggestionsAtom(env, product));
+      });
+    });
+  }
+
+  if (filteredEnv.length && filteredApp.length) {
+    filteredEnv.forEach((env) => {
+      filteredApp.forEach((app) => {
+        if (isKeyPresent[`${env}-${app}`]) return;
+        isKeyPresent[`${env}-${app}`] = true;
+        suggestion.push(getSuggestionsAtom(env, "", app));
       });
     });
   }
@@ -56,7 +71,17 @@ const getSuggestions = (envText, productText, appText) => {
     });
   }
 
-  if (filteredEnv.length) {
+  if (filteredProduct.length && !isNonGeneric) {
+    filteredProduct.forEach((product) => {
+      ENV_KEY_LIST.forEach((env) => {
+        if (isKeyPresent[`${env}-${product}`]) return;
+        isKeyPresent[`${env}-${product}`] = true;
+        suggestion.push(getSuggestionsAtom(env, product));
+      });
+    });
+  }
+
+  if (filteredEnv.length && !isNonGeneric) {
     filteredEnv.forEach((env) => {
       PRODUCT_KEY_LIST.forEach((product) => {
         if (isKeyPresent[`${env}-${product}`]) return;
@@ -66,12 +91,12 @@ const getSuggestions = (envText, productText, appText) => {
     });
   }
 
-  if (filteredApp.length) {
+  if (filteredApp.length && !isNonGeneric) {
     filteredApp.forEach((app) => {
       ENV_KEY_LIST.forEach((env) => {
         if (isKeyPresent[`${env}-${app}`]) return;
         isKeyPresent[`${env}-${app}`] = true;
-        suggestion.push(getSuggestionsAtom(env, app));
+        suggestion.push(getSuggestionsAtom(env, "", app));
       });
     });
   }
@@ -93,8 +118,11 @@ chrome.omnibox.onInputChanged.addListener((text, suggest) => {
       break;
     }
     case 2: {
-      const [envText, productText] = splitText;
-      suggestion = getSuggestions(envText, productText, envText);
+      const [envText, appOrProductText] = splitText;
+      suggestion = [
+        ...getSuggestions(envText, appOrProductText, "", true),
+        ...getSuggestions(envText, "", appOrProductText, true),
+      ];
       break;
     }
     case 3: {
