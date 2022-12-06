@@ -12,18 +12,23 @@ const PRODUCT_KEY_LIST = Object.keys(PRODUCT_MAP);
 const SONAR_QUBE_LIST = Object.keys(SONAR_QUBE);
 
 const getFilteredList = (list, key) =>
-  list.filter((env) => env.toLowerCase().indexOf(key.toLowerCase()) !== -1);
+  list.filter(
+    (env) => key && env.toLowerCase().indexOf(key.toLowerCase()) !== -1
+  );
 
 const getSuggestionsAtom = (env, product = "", app = "") => {
+  console.log('getSuggestionsAtom', env, app);
   let URL = URLGenerator(env, product, app);
   return {
     content: `${URL}`,
     deletable: true,
-    description: `${env}${product ? `-${product}` : ""}${app ? `-${app}` : ""} URL: <url>${URL}</url>`,
+    description: `${env}${product ? `-${product}` : ""}${
+      app ? `-${app}` : ""
+    } URL: <url>${URL}</url>`,
   };
 };
 
-const getSuggestions = (envText, productText, appText) => {
+const getSuggestions = (envText, productText, appText, isNonGeneric = false) => {
   const filteredProduct = getFilteredList(PRODUCT_KEY_LIST, productText);
   const filteredEnv = getFilteredList(ENV_KEY_LIST, envText);
   const filteredApp = getFilteredList(APP_KEY_LIST, appText);
@@ -66,7 +71,7 @@ const getSuggestions = (envText, productText, appText) => {
     });
   }
 
-  if (filteredProduct.length) {
+  if (filteredProduct.length && !isNonGeneric) {
     filteredProduct.forEach((product) => {
       ENV_KEY_LIST.forEach((env) => {
         if (isKeyPresent[`${env}-${product}`]) return;
@@ -76,7 +81,7 @@ const getSuggestions = (envText, productText, appText) => {
     });
   }
 
-  if (filteredEnv.length) {
+  if (filteredEnv.length && !isNonGeneric) {
     filteredEnv.forEach((env) => {
       PRODUCT_KEY_LIST.forEach((product) => {
         if (isKeyPresent[`${env}-${product}`]) return;
@@ -86,7 +91,7 @@ const getSuggestions = (envText, productText, appText) => {
     });
   }
 
-  if (filteredApp.length) {
+  if (filteredApp.length && !isNonGeneric) {
     filteredApp.forEach((app) => {
       ENV_KEY_LIST.forEach((env) => {
         if (isKeyPresent[`${env}-${app}`]) return;
@@ -114,8 +119,10 @@ chrome.omnibox.onInputChanged.addListener((text, suggest) => {
     }
     case 2: {
       const [envText, appOrProductText] = splitText;
-      suggestion = getSuggestions(envText, appOrProductText, "");
-      suggestion = getSuggestions(envText, "", appOrProductText);
+      suggestion = [
+        ...getSuggestions(envText, appOrProductText, "", true),
+        ...getSuggestions(envText, "", appOrProductText, true),
+      ];
       break;
     }
     case 3: {
