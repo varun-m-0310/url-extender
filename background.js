@@ -113,10 +113,9 @@ chrome.omnibox.onInputChanged.addListener((text, suggest) => {
       break;
     }
     case 2: {
-      const [envText, productText] = splitText;
-      suggestion = getSuggestions(envText, productText, envText);
-      const [_, appText] = splitText;
-      suggestion = getSuggestions(envText, appText, envText);
+      const [envText, appOrProductText] = splitText;
+      suggestion = getSuggestions(envText, appOrProductText, "");
+      suggestion = getSuggestions(envText, "", appOrProductText);
       break;
     }
     case 3: {
