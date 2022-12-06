@@ -75,7 +75,7 @@ const getSuggestions = (envText, productText, appText) => {
       });
     });
   }
-  
+
   return suggestion;
 };
 
