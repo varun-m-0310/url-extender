@@ -37,7 +37,7 @@ export const PRODUCT_MAP = {
   ELASTICHQ: "elastichq.",
   GRAFANA: "grafana.",
   KIBANA: "kibana.",
-  PMA: "rockmongo.",
+  PMA: "pma.",
 };
 
 export const URLGenerator = (env, product, app) =>
